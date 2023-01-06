@@ -27,8 +27,6 @@ export const Home = () => {
     dispatch(fetchTags());
   }, []);
 
-  console.log(tags);
-
   return (
     <>
       <Tabs
