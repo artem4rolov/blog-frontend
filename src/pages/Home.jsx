@@ -15,7 +15,7 @@ import { fetchPosts, fetchTags } from "../redux/slices/posts";
 export const Home = () => {
   const dispatch = useDispatch();
   // достаем посты и тэги из хранилища redux
-  const { posts, tags } = useSelector((state) => state);
+  const { posts, tags } = useSelector((state) => state.posts);
 
   // проверяем, идет ли сейчас загрузка постов или тегов
   const isPostsLoading = posts.status === "loading";
