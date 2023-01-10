@@ -17,6 +17,12 @@ const initialState = {
 const authSlice = createSlice({
   name: "auth",
   initialState,
+  reducers: {
+    // выход из аккаунта
+    logout: (state) => {
+      state.data = null;
+    },
+  },
   extraReducers: {
     // авторизация
     // в то время, когда происходит загрузка данных пользователя
@@ -47,3 +53,6 @@ const authSlice = createSlice({
 export const selectIsAuth = (state) => Boolean(state.auth.data);
 
 export const authReducer = authSlice.reducer;
+
+// достаем функцию выхода из аккаунта
+export const { logout } = authSlice.actions;
