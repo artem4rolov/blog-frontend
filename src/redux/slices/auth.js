@@ -17,6 +17,17 @@ export const fetchAuthMe = createAsyncThunk("auth/fetchAuthMe", async () => {
   return data;
 });
 
+// прегистрация
+export const fetchRegister = createAsyncThunk(
+  "auth/fetchRegister",
+  async (params) => {
+    // получаем данные пользователя при регистрации (аватарка, имя, почта и пароль)
+    const { data } = await axios.post("/auth/register", params);
+    // возвращаем объект с информацией о пользователе
+    return data;
+  }
+);
+
 const initialState = {
   data: null,
   status: "loading",
@@ -67,6 +78,22 @@ const authSlice = createSlice({
     },
 
     [fetchAuthMe.rejected]: (state) => {
+      state.data = null;
+      state.status = "error";
+    },
+    //
+    // регистрация
+    [fetchRegister.pending]: (state) => {
+      state.data = null;
+      state.status = "loading";
+    },
+
+    [fetchRegister.fulfilled]: (state, action) => {
+      state.data = action.payload;
+      state.status = "loaded";
+    },
+
+    [fetchRegister.rejected]: (state) => {
       state.data = null;
       state.status = "error";
     },
