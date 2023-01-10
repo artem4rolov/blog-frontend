@@ -12,6 +12,7 @@ import { fetchPosts, fetchTags } from "../redux/slices/posts";
 export const Home = () => {
   const dispatch = useDispatch();
   // достаем посты и тэги из хранилища redux
+  const userData = useSelector((state) => state.auth.data);
   const { posts, tags } = useSelector((state) => state.posts);
 
   // проверяем, идет ли сейчас загрузка постов или тегов
@@ -51,7 +52,8 @@ export const Home = () => {
                 viewsCount={obj.viewsCount}
                 commentsCount={3}
                 tags={obj.tags}
-                isEditable
+                // если _id текущего пользователя не совпадает с _id пользователя, который созда конкретный пост - редактирование и удаление конкретного поста недоступно для текущего пользователя
+                isEditable={userData?._id === obj.user._id}
               />
             )
           )}
