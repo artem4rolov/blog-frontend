@@ -31,10 +31,22 @@ export const Login = () => {
     mode: "onChange",
   });
 
-  const onSubmit = (values) => {
-    console.log(dispatch(fetchAuth(values)));
+  const onSubmit = async (values) => {
+    // получаем данные пользователя в формате action{type: ... , payload: ...}
+    const data = await dispatch(fetchAuth(values));
+
+    // если не удалось получить данные о пользователе (action{type: 'auth/fetchAuth/fulfilled', payload: undefined})
+    if (!data.payload) {
+      alert("Не удалось авторизоваться");
+    }
+
+    // если есть ключ token (не пустое значение) в action.payload, заносим его в localStorage
+    if ("token" in data.payload) {
+      window.localStorage.setItem("token", data.payload.token);
+    }
   };
 
+  // если мы авторизованы - переходим на главную страницу
   if (isAuth) {
     return <Navigate to="/" />;
   }

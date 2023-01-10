@@ -1,11 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../axios";
 
+// проверка на наличие такого пользователя в БД MongoDB
 export const fetchAuth = createAsyncThunk("auth/fetchAuth", async (params) => {
   // получаем данные с формы заполнения логина и пароля при входе
   const { data } = await axios.post("/auth/login", params);
   // возвращаем объект с информацией о пользователе
-  console.log(data);
+  return data;
+});
+
+// проверка авторизации пользователя при создании поста/комментария и тд
+export const fetchAuthMe = createAsyncThunk("auth/fetchAuthMe", async () => {
+  // получаем данные токена (поскольку при каждом запросе мы настроили постоянную проверку localStorage на наличие токена авторизации)
+  const { data } = await axios.get("/auth/me");
+  // возвращаем объект с информацией о пользователе
   return data;
 });
 
@@ -44,6 +52,22 @@ const authSlice = createSlice({
       // данных о пользователе нет
       state.data = null;
       // меняем текст сообщения
+      state.status = "error";
+    },
+    //
+    // проверка авторизации при создании постов, комментариев и тд
+    [fetchAuthMe.pending]: (state) => {
+      state.data = null;
+      state.status = "loading";
+    },
+
+    [fetchAuthMe.fulfilled]: (state, action) => {
+      state.data = action.payload;
+      state.status = "loaded";
+    },
+
+    [fetchAuthMe.rejected]: (state) => {
+      state.data = null;
       state.status = "error";
     },
   },
