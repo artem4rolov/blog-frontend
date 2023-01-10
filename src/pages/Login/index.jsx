@@ -25,14 +25,14 @@ export const Login = () => {
   } = useForm({
     defaultValues: {
       email: "",
-      passwordHash: "",
+      password: "",
     },
     // валидируем только при условии, что поля заполнены
     mode: "onChange",
   });
 
   const onSubmit = (values) => {
-    dispatch(fetchAuth(values));
+    console.log(dispatch(fetchAuth(values)));
   };
 
   if (isAuth) {
