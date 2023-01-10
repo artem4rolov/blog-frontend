@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 // простой редактор для создания постов
 import SimpleMDE from "react-simplemde-editor";
 import { useSelector } from "react-redux";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, useParams } from "react-router-dom";
 
 import "easymde/dist/easymde.min.css";
 import styles from "./AddPost.module.scss";
@@ -13,6 +13,9 @@ import { selectIsAuth } from "../../redux/slices/auth";
 import axios from "../../axios";
 
 export const AddPost = () => {
+  // достаем id статьи из url'а для редактирования конкретной статьи
+  const { id } = useParams();
+  //
   const navigate = useNavigate();
 
   // понимаем, авторизованы мы или нет
@@ -25,6 +28,9 @@ export const AddPost = () => {
   const [tags, setTags] = React.useState("");
   const [imageUrl, setImageUrl] = React.useState("");
   const inputFileRef = React.useRef(null);
+
+  // обозначаем редактировании статьи
+  const [isEditing, setIsEditing] = useState(false);
 
   // функционал по загрузке изображения в хранилище на бэкенд
   const handleChangeFile = async (event) => {
@@ -61,10 +67,15 @@ export const AddPost = () => {
         text,
       };
 
-      const { data } = await axios.post("/posts", fields);
+      // если это редактирование - patch, если создание - post
+      const { data } = isEditing
+        ? await axios.patch(`/posts/${id}`, fields)
+        : await axios.post("/posts", fields);
 
-      const id = data._id;
-      navigate(`/posts/${id}`);
+      // если это редактирование - перенаправляем пользователя по id поста, который отредактирован
+      // если это создание - достаем из созданного только что поста новый id и перенаправляем по нему пользователя
+      const _id = isEditing ? id : data._id;
+      navigate(`/posts/${_id}`);
     } catch (err) {
       console.warn(err);
       alert("Ошибка при создании статьи");
@@ -74,6 +85,25 @@ export const AddPost = () => {
   // useCallback енобходим для работы библиотеки редактора для создания постов
   const onChange = React.useCallback((value) => {
     setText(value);
+  }, []);
+
+  // если получилось взять id статьи и мы нажали на кнопку редактирования статьи - попадаем в редактор, только все поля уже заполнены и редактируемы
+  React.useEffect(() => {
+    if (id) {
+      setIsEditing(true);
+      axios
+        .get(`/posts/${id}`)
+        .then(({ data }) => {
+          setTitle(data.title);
+          setText(data.text);
+          setImageUrl(data.imageUrl);
+          setTags(data.tags.join(","));
+        })
+        .catch((err) => {
+          console.log(err);
+          alert("Ошибка при получении статьи");
+        });
+    }
   }, []);
 
   // useMemo енобходим для работы библиотеки редактора для создания постов
@@ -156,7 +186,7 @@ export const AddPost = () => {
       />
       <div className={styles.buttons}>
         <Button onClick={onSubmit} size="large" variant="contained">
-          Опубликовать
+          {isEditing ? "Сохранить" : "Опубликовать"}
         </Button>
         <a href="/">
           <Button size="large">Отмена</Button>
